@@ -124,3 +124,183 @@ CREATE TABLE ValidacionAcademica (
     FOREIGN KEY (LegajoDocenteTutor)
         REFERENCES Tutor(LegajoDocenteTutor)
 );
+
+GO
+
+
+
+-- INSERCION DE DATOS
+
+-- 1. Facultad (10 filas)
+INSERT INTO Facultad (ID_Facultad, NombreFacultad, Sede) VALUES
+(1, 'Facultad de Ingenieria y Ciencias Exactas',    'Monserrat'),
+(2, 'Facultad de Ciencias Economicas',               'Monserrat'),
+(3, 'Facultad de Derecho',                           'Monserrat'),
+(4, 'Facultad de Comunicacion',                      'Monserrat'),
+(5, 'Facultad de Psicologia',                        'Belgrano'),
+(6, 'Facultad de Arquitectura',                      'Monserrat'),
+(7, 'Facultad de Ciencias de la Salud',              'Belgrano'),
+(8, 'Facultad de Ciencias Sociales',                 'Monserrat'),
+(9, 'Facultad de Educacion',                         'Belgrano'),
+(10, 'Facultad de Diseno',                           'Monserrat');
+
+-- 2. Estudiante (12 filas)
+INSERT INTO Estudiante (Legajo, DNI, Nombre, Apellido, EmailInst, FechaNac) VALUES
+(1001, '40123456', 'Santiago',  'Lopez',     'slopez@uade.edu.ar',    '2000-03-15'),
+(1002, '40234567', 'Martina',   'Garcia',    'mgarcia@uade.edu.ar',   '2001-07-22'),
+(1003, '40345678', 'Lautaro',   'Martinez',  'lmartinez@uade.edu.ar', '1999-11-08'),
+(1004, '40456789', 'Camila',    'Rodriguez', 'crodriguez@uade.edu.ar','2000-05-12'),
+(1005, '40567890', 'Facundo',   'Fernandez', 'ffernandez@uade.edu.ar','2001-01-30'),
+(1006, '40678901', 'Valentina', 'Diaz',      'vdiaz@uade.edu.ar',     '1999-09-18'),
+(1007, '40789012', 'Ignacio',   'Perez',     'iperez@uade.edu.ar',    '2000-12-25'),
+(1008, '40890123', 'Lucia',     'Gonzalez',  'lgonzalez@uade.edu.ar', '2001-04-03'),
+(1009, '40901234', 'Bruno',     'Sanchez',   'bsanchez@uade.edu.ar',  '2000-08-14'),
+(1010, '41012345', 'Agustina',  'Romero',    'aromero@uade.edu.ar',   '2002-02-28'),
+(1011, '41123456', 'Matias',    'Torres',    'mtorres@uade.edu.ar',   '1999-06-07'),
+(1012, '41234567', 'Sofia',     'Alvarez',   'salvarez@uade.edu.ar',  '2001-10-19');
+
+-- 3. Juego (12 filas)
+INSERT INTO Juego (ID_Juego, Nombre, Genero) VALUES
+(1, 'League of Legends',   'MOBA'),
+(2, 'Valorant',            'Shooter'),
+(3, 'Counter-Strike 2',    'Shooter'),
+(4, 'FIFA 25',             'Deportes'),
+(5, 'Fortnite',            'Battle Royale'),
+(6, 'Street Fighter 6',    'Lucha'),
+(7, 'Age of Empires IV',   'Estrategia'),
+(8, 'Rocket League',       'Deportes'),
+(9, 'Dota 2',              'MOBA'),
+(10, 'Overwatch 2',         'Shooter'),
+(11, 'Minecraft',           'Aventura'),
+(12, 'SimCity',             'Simulacion');
+
+-- 4. RolParticipacion (10 filas)
+INSERT INTO RolParticipacion (ID_Rol, NombreRol, Descripcion) VALUES
+(1, 'Captain',         'Lider del equipo, responsable de la estrategia general'),
+(2, 'Player',          'Jugador titular del equipo'),
+(3, 'Substitute',      'Jugador suplente que reemplaza en caso necesario'),
+(4, 'Analyst',         'Encargado de analizar partidas y oponentes'),
+(5, 'Coach',           'Entrenador que guia al equipo durante las competencias'),
+(6, 'Manager',         'Gestor administrativo y logistico del equipo'),
+(7, 'Streamer',        'Transmite las partidas y eventos en vivo'),
+(8, 'Content Creator', 'Crea contenido multimedia para la difusion del equipo'),
+(9, 'Team Lead',       'Coordinador general que supervisa todas las areas'),
+(10, 'Tactical Coach',  'Entrenador tactico especializado en mecanicas de juego');
+
+-- 5. Tutor (12 filas)
+INSERT INTO Tutor (LegajoDocenteTutor, Nombre, Apellido, EmailInst, DNI) VALUES
+(2001, 'Carlos',   'Mendoza', 'cmendoza@uade.edu.ar',  '30123456'),
+(2002, 'Maria',    'Lencinas','mlencinas@uade.edu.ar', '30234567'),
+(2003, 'Pablo',    'Quiroga', 'pquiroga@uade.edu.ar',  '30345678'),
+(2004, 'Laura',    'Espinoza','lespinoza@uade.edu.ar', '30456789'),
+(2005, 'Diego',    'Roldan',  'droldan@uade.edu.ar',   '30567890'),
+(2006, 'Florencia','Molina',  'fmolina@uade.edu.ar',   '30678901'),
+(2007, 'Gustavo',  'Navarro', 'gnavarro@uade.edu.ar',  '30789012'),
+(2008, 'Andrea',   'Paz',     'apaz@uade.edu.ar',      '30890123'),
+(2009, 'Hernan',   'Castro',  'hcastro@uade.edu.ar',   '30901234'),
+(2010, 'Valeria',  'Suarez',  'vsuarez@uade.edu.ar',   '31012345'),
+(2011, 'Jorge',    'Acosta',  'jacosta@uade.edu.ar',   '31123456'),
+(2012, 'Patricia', 'Luna',    'pluna@uade.edu.ar',     '31234567');
+
+-- 6. TipoValidacionAcademica (10 filas)
+INSERT INTO TipoValidacionAcademica (ID_TipoValidacion, NombreRequisito) VALUES
+(1, 'Participacion en torneo oficial'),
+(2, 'Horas de entrenamiento registradas'),
+(3, 'Aprobacion de taller deportivo'),
+(4, 'Competencia interuniversitaria'),
+(5, 'Torneo regional clasificatorio'),
+(6, 'Taller de liderazgo deportivo'),
+(7, 'Clinica de entrenamiento avanzado'),
+(8, 'Jornada de integracion deportiva'),
+(9, 'Participacion en liga interna'),
+(10, 'Competencia nacional universitaria');
+
+-- 7. Carrera (12 filas, FK a Facultad)
+INSERT INTO Carrera (ID_Carrera, Nombre, ID_Facultad) VALUES
+(1, 'Ingenieria Informatica',       1),
+(2, 'Licenciatura en Sistemas',     1),
+(3, 'Contador Publico',             2),
+(4, 'Abogacia',                     3),
+(5, 'Licenciatura en Comunicacion', 4),
+(6, 'Licenciatura en Psicologia',   5),
+(7, 'Arquitectura',                 6),
+(8, 'Medicina',                     7),
+(9, 'Licenciatura en Sociologia',   8),
+(10, 'Licenciatura en Diseno Grafico', 10),
+(11, 'Ingenieria Industrial',        1),
+(12, 'Licenciatura en Marketing',    2);
+
+-- 8. InscripcionCarrera (12 filas, FKs a Estudiante y Carrera)
+INSERT INTO InscripcionCarrera (Legajo, ID_Carrera) VALUES
+(1001, 1),
+(1002, 2),
+(1003, 1),
+(1004, 3),
+(1005, 5),
+(1006, 4),
+(1007, 6),
+(1008, 7),
+(1009, 8),
+(1010, 9),
+(1011, 10),
+(1012, 11);
+
+-- 9. TorneoESports (12 filas, FK a Juego)
+INSERT INTO TorneoESports (ID_Torneo, Edicion, Estado, FechaInicio, FechaFin, ID_Juego) VALUES
+(1,  '2025 S1', 'Finalizado', '2025-03-01', '2025-06-15', 1),
+(2,  '2025 S1', 'Finalizado', '2025-03-10', '2025-06-20', 2),
+(3,  '2025 S1', 'Finalizado', '2025-04-01', '2025-07-01', 4),
+(4,  '2025 S2', 'Finalizado', '2025-08-01', '2025-11-30', 1),
+(5,  '2025 S2', 'Finalizado', '2025-08-15', '2025-11-20', 2),
+(6,  '2025 S2', 'Finalizado', '2025-09-01', '2025-12-01', 3),
+(7,  '2026 S1', 'En curso',   '2026-03-01', '2026-06-30', 1),
+(8,  '2026 S1', 'En curso',   '2026-03-10', '2026-06-25', 5),
+(9,  '2026 S1', 'Proximo',    '2026-07-01', '2026-09-30', 2),
+(10, '2026 S1', 'Proximo',    '2026-07-15', '2026-10-15', 4),
+(11, '2026 S1', 'En curso',   '2026-03-05', '2026-06-20', 6),
+(12, '2025 Anual', 'Finalizado', '2025-02-01', '2025-12-15', 7);
+
+-- 10. Equipo (12 filas, FK a TorneoESports)
+INSERT INTO Equipo (ID_Equipo, Nombre, FechaInscrip, ID_Torneo) VALUES
+(1,  'UADE Lions',   '2025-02-15', 1),
+(2,  'UADE Wolves',  '2025-02-20', 1),
+(3,  'UADE Phoenix', '2025-03-01', 2),
+(4,  'UADE Falcons', '2025-03-15', 3),
+(5,  'UADE Titans',  '2025-07-20', 4),
+(6,  'UADE Warriors','2025-08-01', 5),
+(7,  'UADE Knights', '2025-08-10', 6),
+(8,  'UADE Dragons', '2026-02-20', 7),
+(9,  'UADE Eagles',  '2026-02-25', 8),
+(10, 'UADE Sharks',  '2026-06-15', 9),
+(11, 'UADE Panthers','2026-06-20', 10),
+(12, 'UADE Bears',   '2026-02-10', 11);
+
+-- 11. Integra (12 filas, FKs a Estudiante, Equipo, RolParticipacion)
+INSERT INTO Integra (Legajo, ID_Equipo, ID_Rol) VALUES
+(1001, 1, 1),
+(1002, 1, 2),
+(1003, 1, 2),
+(1004, 1, 3),
+(1005, 2, 1),
+(1006, 2, 2),
+(1007, 2, 4),
+(1008, 3, 1),
+(1009, 3, 2),
+(1010, 4, 5),
+(1011, 5, 2),
+(1012, 5, 6);
+
+-- 12. ValidacionAcademica (11 filas, FKs a Integra, TipoValidacionAcademica y Tutor)
+INSERT INTO ValidacionAcademica (ID_Validacion, EstadoAprobacion, ComentariosTutor, FechaRes, Legajo, ID_Equipo, ID_Rol, ID_TipoValidacion, LegajoDocenteTutor) VALUES
+(1,  'Aprobado',  'Excelente desempeno en el torneo',              '2025-06-20', 1001, 1, 1, 1, 2001),
+(2,  'Aprobado',  'Cumplio con las horas requeridas',              '2025-06-20', 1002, 1, 2, 2, 2001),
+(3,  'Rechazado', 'No asistio a las jornadas obligatorias',        '2025-06-25', 1004, 1, 3, 1, 2001),
+(4,  'Pendiente', NULL,                                             NULL,        1005, 2, 1, 3, NULL),
+(5,  'Aprobado',  'Muy buen trabajo analitico del equipo rival',   '2025-07-01', 1007, 2, 4, 4, 2003),
+(6,  'Pendiente', NULL,                                             NULL,        1008, 3, 1, 5, NULL),
+(7,  'Aprobado',  'Demostro mejoras significativas en su rol',     '2025-12-05', 1011, 5, 2, 2, 2005),
+(8,  'Aprobado',  'Gran compromiso y dedicacion con el equipo',    '2026-04-15', 1003, 1, 2, 6, 2001),
+(9,  'Pendiente', NULL,                                             NULL,        1006, 2, 2, 7, NULL),
+(10, 'Aprobado',  'Cumplio con todos los requisitos academicos',   '2026-05-10', 1012, 5, 6, 8, 2007),
+(11, 'Rechazado', 'No alcanzo el minimo de participaciones',       '2026-05-20', 1010, 4, 5, 9, 2008);
+
