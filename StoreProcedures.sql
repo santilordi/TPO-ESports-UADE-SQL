@@ -403,17 +403,34 @@ GO
 -- REGLA DE NEGOCIO Y FUNCIÓN
 -----------------------------------------------------------
 
-CREATE OR ALTER PROCEDURE sp_InscribirEquipoSeguro @nombre VARCHAR(100), @idTorneo INT
+-- Aprobar una validación académica vinculando al tutor y cambiando estado
+CREATE OR ALTER PROCEDURE sp_AprobarValidacionAcademica
+    @idVal INT,
+    @legTutor INT,
+    @comentarios VARCHAR(255) = 'default'
 AS
 BEGIN
-    DECLARE @estadoTorneo VARCHAR(50);
-    SELECT @estadoTorneo = Estado FROM TorneoESports WHERE ID_Torneo = @idTorneo;
-
-    IF (@estadoTorneo IS NULL) PRINT('Error: Torneo no existe.');
-    ELSE IF (@estadoTorneo != 'Proximo') PRINT('Error: Inscripciones cerradas.');
+    -- 1. Validar que la validación existe
+    IF NOT EXISTS(SELECT 1 FROM ValidacionAcademica WHERE ID_Validacion = @idVal)
+        PRINT('Error: El ID de Validación no existe.');
+    -- 2. Validar que el tutor existe
+    ELSE IF NOT EXISTS(SELECT 1 FROM Tutor WHERE LegajoDocenteTutor = @legTutor)
+        PRINT('Error: El Tutor especificado no existe.');
     ELSE
     BEGIN
-        EXEC sp_InsertarEquipo @nombre, '2026-06-15', @idTorneo;
+        DECLARE @cComent VARCHAR(255);
+        SELECT @cComent = ComentariosTutor FROM ValidacionAcademica WHERE ID_Validacion = @idVal;
+
+        IF (@comentarios != 'default') SET @cComent = @comentarios;
+
+        UPDATE ValidacionAcademica
+        SET EstadoAprobacion = 'Aprobado',
+            ComentariosTutor = @cComent,
+            FechaRes = CAST(GETDATE() AS DATE),
+            LegajoDocenteTutor = @legTutor
+        WHERE ID_Validacion = @idVal;
+
+        PRINT('La validación académica ha sido aprobada y vinculada al tutor.');
     END
 END;
 GO
