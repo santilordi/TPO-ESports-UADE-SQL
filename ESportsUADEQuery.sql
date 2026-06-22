@@ -752,3 +752,191 @@ BEGIN
 END;
 GO
 
+--------------------
+-- CONSULTAS
+--------------------
+
+--Q-01: Historial de participaciones por alumno
+SELECT 
+    e.Legajo,
+    e.Nombre + ' ' + e.Apellido AS Estudiante,
+    t.Edicion AS TorneoEdicion,
+    j.Nombre AS Juego,
+    eq.Nombre AS Equipo,
+    r.NombreRol AS Rol,
+    ISNULL(v.EstadoAprobacion, 'No Iniciada') AS EstadoValidacion
+FROM Estudiante e
+INNER JOIN Integra i ON e.Legajo = i.Legajo
+INNER JOIN Equipo eq ON i.ID_Equipo = eq.ID_Equipo
+INNER JOIN TorneoESports t ON eq.ID_Torneo = t.ID_Torneo
+INNER JOIN Juego j ON t.ID_Juego = j.ID_Juego
+INNER JOIN RolParticipacion r ON i.ID_Rol = r.ID_Rol
+LEFT JOIN ValidacionAcademica v ON i.Legajo = v.Legajo 
+                               AND i.ID_Equipo = v.ID_Equipo 
+                               AND i.ID_Rol = v.ID_Rol
+ORDER BY e.Apellido, e.Nombre;
+
+
+--Q-02: Ranking de alumnos más activos
+SELECT 
+    e.Legajo,
+    e.Nombre + ' ' + e.Apellido AS Estudiante,
+    COUNT(DISTINCT t.ID_Torneo) AS CantidadEdiciones
+FROM Estudiante e
+INNER JOIN Integra i ON e.Legajo = i.Legajo
+INNER JOIN Equipo eq ON i.ID_Equipo = eq.ID_Equipo
+INNER JOIN TorneoESports t ON eq.ID_Torneo = t.ID_Torneo
+GROUP BY e.Legajo, e.Nombre, e.Apellido
+ORDER BY CantidadEdiciones DESC, e.Apellido ASC;
+
+
+--Q-03: Validaciones pendientes con datos del tutor
+SELECT 
+    v.ID_Validacion,
+    e.Nombre + ' ' + e.Apellido AS Estudiante,
+    tv.NombreRequisito AS TipoValidacion,
+    t.Edicion AS EdicionTorneo,
+    j.Nombre AS Juego,
+    v.EstadoAprobacion,
+    ISNULL(tut.Nombre + ' ' + tut.Apellido, 'Sin Tutor Asignado') AS DocenteTutor
+FROM ValidacionAcademica v
+INNER JOIN Estudiante e ON v.Legajo = e.Legajo
+INNER JOIN TipoValidacionAcademica tv ON v.ID_TipoValidacion = tv.ID_TipoValidacion
+INNER JOIN Equipo eq ON v.ID_Equipo = eq.ID_Equipo
+INNER JOIN TorneoESports t ON eq.ID_Torneo = t.ID_Torneo
+INNER JOIN Juego j ON t.ID_Juego = j.ID_Juego
+LEFT JOIN Tutor tut ON v.LegajoDocenteTutor = tut.LegajoDocenteTutor
+WHERE v.EstadoAprobacion = 'Pendiente';
+
+
+--Q-04: Equipos con más integrantes por torneo
+SELECT 
+    t.Edicion AS TorneoEdicion,
+    j.Nombre AS Juego,
+    eq.Nombre AS Equipo,
+    COUNT(i.Legajo) AS TotalIntegrantes
+FROM TorneoESports t
+INNER JOIN Juego j ON t.ID_Juego = j.ID_Juego
+INNER JOIN Equipo eq ON t.ID_Torneo = eq.ID_Torneo
+INNER JOIN Integra i ON eq.ID_Equipo = i.ID_Equipo
+GROUP BY t.Edicion, j.Nombre, eq.Nombre, t.ID_Torneo
+ORDER BY t.ID_Torneo ASC, TotalIntegrantes DESC;
+
+
+--Q-05: Distribución de roles en el sistema
+SELECT 
+    r.NombreRol AS Rol,
+    COUNT(DISTINCT i.Legajo) AS CantidadEstudiantesDistinct
+FROM RolParticipacion r
+LEFT JOIN Integra i ON r.ID_Rol = i.ID_Rol
+GROUP BY r.ID_Rol, r.NombreRol
+ORDER BY CantidadEstudiantesDistinct DESC;
+
+
+--Q-06: Alumnos que nunca iniciaron una validación
+SELECT DISTINCT
+    e.Legajo,
+    e.Nombre + ' ' + e.Apellido AS Estudiante,
+    e.EmailInst
+FROM Estudiante e
+INNER JOIN Integra i ON e.Legajo = i.Legajo
+WHERE NOT EXISTS (
+    SELECT 1 
+    FROM ValidacionAcademica v 
+    WHERE v.Legajo = e.Legajo
+)
+ORDER BY Estudiante ASC;
+
+
+--Q-07: Tasa de aprobación por tipo de validación y facultad
+SELECT 
+    f.NombreFacultad AS Facultad,
+    tv.NombreRequisito AS TipoValidacion,
+    COUNT(v.ID_Validacion) AS TotalSolicitudes,
+    -- Cálculo porcentual utilizando multiplicador decimal para evitar truncado entero
+    CAST(SUM(CASE WHEN v.EstadoAprobacion = 'Aprobado' THEN 1 ELSE 0 END) * 100.0 / COUNT(v.ID_Validacion) AS DECIMAL(5,2)) AS PorcentajeAprobadas,
+    CAST(SUM(CASE WHEN v.EstadoAprobacion = 'Rechazado' THEN 1 ELSE 0 END) * 100.0 / COUNT(v.ID_Validacion) AS DECIMAL(5,2)) AS PorcentajeRechazadas,
+    CAST(SUM(CASE WHEN v.EstadoAprobacion = 'Pendiente' THEN 1 ELSE 0 END) * 100.0 / COUNT(v.ID_Validacion) AS DECIMAL(5,2)) AS PorcentajePendientes
+FROM ValidacionAcademica v
+INNER JOIN TipoValidacionAcademica tv ON v.ID_TipoValidacion = tv.ID_TipoValidacion
+INNER JOIN Estudiante e ON v.Legajo = e.Legajo
+INNER JOIN InscripcionCarrera ic ON e.Legajo = ic.Legajo
+INNER JOIN Carrera c ON ic.ID_Carrera = c.ID_Carrera
+INNER JOIN Facultad f ON c.ID_Facultad = f.ID_Facultad
+GROUP BY f.ID_Facultad, f.NombreFacultad, tv.ID_TipoValidacion, tv.NombreRequisito
+ORDER BY f.NombreFacultad, TotalSolicitudes DESC;
+
+
+--Q-08: Edad promedio de participantes por torneo
+SELECT 
+    t.Edicion AS TorneoEdicion,
+    j.Nombre AS Juego,
+    CAST(AVG(CAST(dbo.fn_CalcularEdadEstudiante(e.Legajo) AS DECIMAL(4,2))) AS DECIMAL(4,1)) AS EdadPromedio
+FROM TorneoESports t
+INNER JOIN Juego j ON t.ID_Juego = j.ID_Juego
+INNER JOIN Equipo eq ON t.ID_Torneo = eq.ID_Torneo
+INNER JOIN Integra i ON eq.ID_Equipo = i.ID_Equipo
+INNER JOIN Estudiante e ON i.Legajo = e.Legajo
+GROUP BY t.ID_Torneo, t.Edicion, j.Nombre
+ORDER BY t.Edicion;
+
+
+--Q-09: Docentes con más validaciones pendientes
+SELECT 
+    t.LegajoDocenteTutor AS LegajoDocente,
+    t.Nombre + ' ' + t.Apellido AS DocenteTutor,
+    t.EmailInst AS EmailContacto,
+    COUNT(v.ID_Validacion) AS CantidadValidacionesPendientes
+FROM Tutor t
+INNER JOIN ValidacionAcademica v ON t.LegajoDocenteTutor = v.LegajoDocenteTutor
+WHERE v.EstadoAprobacion = 'Pendiente'
+GROUP BY t.LegajoDocenteTutor, t.Nombre, t.Apellido, t.EmailInst
+HAVING COUNT(v.ID_Validacion) > 0
+ORDER BY CantidadValidacionesPendientes DESC;
+
+
+--Q-10: Casos de éxito: validaciones aprobadas por torneo
+SELECT 
+    t.Edicion AS TorneoEdicion,
+    e.Nombre + ' ' + e.Apellido AS AlumnoExitoso,
+    c.Nombre AS Carrera,
+    r.NombreRol AS RolEjercido,
+    tv.NombreRequisito AS TipoValidacionAcreditada,
+    v.FechaRes AS FechaDeAprobacion
+FROM TorneoESports t
+INNER JOIN Equipo eq ON t.ID_Torneo = eq.ID_Torneo
+INNER JOIN Integra i ON eq.ID_Equipo = i.ID_Equipo
+INNER JOIN Estudiante e ON i.Legajo = e.Legajo
+INNER JOIN InscripcionCarrera ic ON e.Legajo = ic.Legajo
+INNER JOIN Carrera c ON ic.ID_Carrera = c.ID_Carrera
+INNER JOIN RolParticipacion r ON i.ID_Rol = r.ID_Rol
+INNER JOIN ValidacionAcademica v ON i.Legajo = v.Legajo 
+                               AND i.ID_Equipo = v.ID_Equipo 
+                               AND i.ID_Rol = v.ID_Rol
+INNER JOIN TipoValidacionAcademica tv ON v.ID_TipoValidacion = tv.ID_TipoValidacion
+WHERE v.EstadoAprobacion = 'Aprobado'
+  AND t.ID_Torneo IN (
+      -- Subconsulta requerida para identificar torneos con casos de éxito
+      SELECT sub_eq.ID_Torneo
+      FROM ValidacionAcademica sub_v
+      INNER JOIN Equipo sub_eq ON sub_v.ID_Equipo = sub_eq.ID_Equipo
+      WHERE sub_v.EstadoAprobacion = 'Aprobado'
+      GROUP BY sub_eq.ID_Torneo
+      HAVING COUNT(sub_v.ID_Validacion) >= 1
+  )
+ORDER BY t.Edicion ASC, e.Apellido ASC;
+
+
+--Q-11: Evolución de participaciones por semestre
+SELECT
+    t.Edicion AS Semestre,
+    COUNT(DISTINCT t.ID_Torneo) AS CantidadTorneos,
+    COUNT(DISTINCT eq.ID_Equipo) AS CantidadEquipos,
+    COUNT(DISTINCT i.Legajo) AS EstudiantesParticipantes,
+    COUNT(DISTINCT eq.ID_Equipo) * 1.0 / NULLIF(COUNT(DISTINCT t.ID_Torneo), 0) AS PromedioEquiposPorTorneo,
+    COUNT(DISTINCT i.Legajo) * 1.0 / NULLIF(COUNT(DISTINCT eq.ID_Equipo), 0) AS PromedioEstudiantesPorEquipo
+FROM TorneoESports t
+INNER JOIN Equipo eq ON t.ID_Torneo = eq.ID_Torneo
+INNER JOIN Integra i ON eq.ID_Equipo = i.ID_Equipo
+GROUP BY t.Edicion
+ORDER BY t.Edicion ASC;
