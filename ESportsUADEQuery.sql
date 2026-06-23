@@ -752,6 +752,88 @@ BEGIN
 END;
 GO
 
+-----------------------------------------------------------
+-- TRIGGERS
+-----------------------------------------------------------
+
+-- TRIGGER A: Auditoria de cambios de estado en ValidacionAcademica
+-- Regla: cada vez que una validacion cambia de EstadoAprobacion
+-- (ej. Pendiente -> Aprobado/Rechazado) se deja registro historico
+-- de quien la resolvio y cuando. Da trazabilidad a la acreditacion academica.
+
+-- Tabla de soporte para el log de auditoria (se crea solo si no existe)
+IF OBJECT_ID('dbo.AuditoriaValidacion', 'U') IS NULL
+BEGIN
+    CREATE TABLE AuditoriaValidacion (
+        ID_Auditoria       INT IDENTITY(1,1) PRIMARY KEY,
+        ID_Validacion      INT NOT NULL,
+        EstadoAnterior     VARCHAR(50) NOT NULL,
+        EstadoNuevo        VARCHAR(50) NOT NULL,
+        LegajoDocenteTutor INT NULL,
+        FechaCambio        DATETIME NOT NULL DEFAULT GETDATE(),
+        UsuarioBD          VARCHAR(128) NOT NULL DEFAULT SUSER_SNAME()
+    );
+END;
+GO
+
+CREATE OR ALTER TRIGGER TR_AuditarValidacionAcademica
+ON ValidacionAcademica
+AFTER UPDATE
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    -- Solo audita cuando realmente cambio el estado (ignora updates de comentarios/fecha)
+    INSERT INTO AuditoriaValidacion (ID_Validacion, EstadoAnterior, EstadoNuevo, LegajoDocenteTutor)
+    SELECT i.ID_Validacion, d.EstadoAprobacion, i.EstadoAprobacion, i.LegajoDocenteTutor
+    FROM inserted i
+    INNER JOIN deleted d ON i.ID_Validacion = d.ID_Validacion
+    WHERE i.EstadoAprobacion <> d.EstadoAprobacion;
+END;
+GO
+
+-- TRIGGER B: Validacion de la inscripcion de equipos a torneos
+-- Regla de negocio (cruza Equipo <-> TorneoESports, no la cubre un CHECK):
+--   1. No se puede inscribir un equipo en un torneo Finalizado o Cancelado.
+--   2. La fecha de inscripcion no puede ser posterior al inicio del torneo.
+-- Si se viola, se aborta la operacion con RAISERROR + ROLLBACK.
+
+CREATE OR ALTER TRIGGER TR_ValidarInscripcionEquipo
+ON Equipo
+AFTER INSERT
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    -- 1. Torneo en un estado que no admite nuevas inscripciones
+    IF EXISTS (
+        SELECT 1
+        FROM inserted i
+        INNER JOIN TorneoESports t ON i.ID_Torneo = t.ID_Torneo
+        WHERE t.Estado IN ('Finalizado', 'Cancelado')
+    )
+    BEGIN
+        RAISERROR('No se puede inscribir un equipo en un torneo Finalizado o Cancelado.', 16, 1);
+        ROLLBACK TRANSACTION;
+        RETURN;
+    END
+
+    -- 2. Fecha de inscripcion posterior al inicio del torneo
+    IF EXISTS (
+        SELECT 1
+        FROM inserted i
+        INNER JOIN TorneoESports t ON i.ID_Torneo = t.ID_Torneo
+        WHERE i.FechaInscrip > t.FechaInicio
+    )
+    BEGIN
+        RAISERROR('La fecha de inscripcion del equipo no puede ser posterior al inicio del torneo.', 16, 1);
+        ROLLBACK TRANSACTION;
+        RETURN;
+    END
+END;
+GO
+
+
 --------------------
 -- CONSULTAS
 --------------------
