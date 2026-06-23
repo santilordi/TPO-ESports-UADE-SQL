@@ -895,7 +895,7 @@ HAVING COUNT(v.ID_Validacion) > 0
 ORDER BY CantidadValidacionesPendientes DESC;
 
 
---Q-10: Casos de éxito: validaciones aprobadas por torneo
+--Q-10: Casos de éxito en Torneos Destacados (con múltiples aprobaciones)
 SELECT 
     t.Edicion AS TorneoEdicion,
     e.Nombre + ' ' + e.Apellido AS AlumnoExitoso,
@@ -916,13 +916,13 @@ INNER JOIN ValidacionAcademica v ON i.Legajo = v.Legajo
 INNER JOIN TipoValidacionAcademica tv ON v.ID_TipoValidacion = tv.ID_TipoValidacion
 WHERE v.EstadoAprobacion = 'Aprobado'
   AND t.ID_Torneo IN (
-      -- Subconsulta requerida para identificar torneos con casos de éxito
+      -- Ahora la subconsulta tiene sentido: filtra torneos con 2 o más éxitos
       SELECT sub_eq.ID_Torneo
       FROM ValidacionAcademica sub_v
       INNER JOIN Equipo sub_eq ON sub_v.ID_Equipo = sub_eq.ID_Equipo
       WHERE sub_v.EstadoAprobacion = 'Aprobado'
       GROUP BY sub_eq.ID_Torneo
-      HAVING COUNT(sub_v.ID_Validacion) >= 1
+      HAVING COUNT(sub_v.ID_Validacion) >= 2
   )
 ORDER BY t.Edicion ASC, e.Apellido ASC;
 
