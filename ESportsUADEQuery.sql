@@ -916,7 +916,7 @@ INNER JOIN ValidacionAcademica v ON i.Legajo = v.Legajo
 INNER JOIN TipoValidacionAcademica tv ON v.ID_TipoValidacion = tv.ID_TipoValidacion
 WHERE v.EstadoAprobacion = 'Aprobado'
   AND t.ID_Torneo IN (
-      -- Ahora la subconsulta tiene sentido: filtra torneos con 2 o más éxitos
+      --Filtra torneos con 2 o más éxitos
       SELECT sub_eq.ID_Torneo
       FROM ValidacionAcademica sub_v
       INNER JOIN Equipo sub_eq ON sub_v.ID_Equipo = sub_eq.ID_Equipo
