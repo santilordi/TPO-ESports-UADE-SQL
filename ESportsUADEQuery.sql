@@ -1022,6 +1022,7 @@ INNER JOIN Equipo eq ON t.ID_Torneo = eq.ID_Torneo
 INNER JOIN Integra i ON eq.ID_Equipo = i.ID_Equipo
 GROUP BY t.Edicion
 ORDER BY t.Edicion ASC;
+GO
 
 
 --------------------
