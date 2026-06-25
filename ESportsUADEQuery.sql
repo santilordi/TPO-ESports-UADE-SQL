@@ -1022,3 +1022,47 @@ INNER JOIN Equipo eq ON t.ID_Torneo = eq.ID_Torneo
 INNER JOIN Integra i ON eq.ID_Equipo = i.ID_Equipo
 GROUP BY t.Edicion
 ORDER BY t.Edicion ASC;
+
+
+--------------------
+-- VISTAS
+--------------------
+-- Vista 1: Ranking de Alumnos Más Activos (Q-02)
+CREATE OR ALTER VIEW vw_ranking_alumnos_activos AS
+SELECT 
+    e.Legajo,
+    e.Nombre,
+    e.Apellido,
+    COUNT(DISTINCT i.ID_Equipo) AS cantidad_equipos,
+    COUNT(DISTINCT t.ID_Torneo) AS cantidad_torneos,
+    COUNT(i.ID_Rol) AS total_participaciones
+FROM Estudiante e
+INNER JOIN Integra i ON e.Legajo = i.Legajo
+INNER JOIN Equipo eq ON i.ID_Equipo = eq.ID_Equipo
+INNER JOIN TorneoESports t ON eq.ID_Torneo = t.ID_Torneo
+GROUP BY 
+    e.Legajo,
+    e.Nombre,
+    e.Apellido;
+GO
+
+-- Vista 2: Edad Promedio de Participantes por Torneo (Q-08)
+CREATE OR ALTER VIEW vw_demografia_por_torneo AS
+SELECT 
+    t.ID_Torneo,
+    t.Edicion AS NombreTorneo,
+    t.FechaInicio,
+    -- Reutilizar función de cálculo de edad exacta
+    CAST(AVG(CAST(dbo.fn_CalcularEdadEstudiante(e.Legajo) AS DECIMAL(4,2))) AS DECIMAL(4,1)) AS edad_promedio,
+    MIN(dbo.fn_CalcularEdadEstudiante(e.Legajo)) AS edad_minima,
+    MAX(dbo.fn_CalcularEdadEstudiante(e.Legajo)) AS edad_maxima,
+    COUNT(DISTINCT e.Legajo) AS total_participantes
+FROM TorneoESports t
+INNER JOIN Equipo eq ON t.ID_Torneo = eq.ID_Torneo
+INNER JOIN Integra i ON eq.ID_Equipo = i.ID_Equipo
+INNER JOIN Estudiante e ON i.Legajo = e.Legajo
+GROUP BY 
+    t.ID_Torneo,
+    t.Edicion,
+    t.FechaInicio;
+GO
