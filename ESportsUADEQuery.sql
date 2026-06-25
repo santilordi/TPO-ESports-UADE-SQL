@@ -311,7 +311,7 @@ GO
 -- 1. FACULTAD
 -----------------------------------------------------------
 
-CREATE OR ALTER PROCEDURE sp_InsertarFacultad
+CREATE OR ALTER PROCEDURE sp_InsertarFacultad  -- crea el proceso o lo pisa si ya existe
     @nombre VARCHAR(100), @sede VARCHAR(100)
 AS 
 BEGIN
