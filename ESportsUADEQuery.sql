@@ -219,7 +219,10 @@ INSERT INTO TipoValidacionAcademica (ID_TipoValidacion, NombreRequisito) VALUES
 (7, 'Clinica de entrenamiento avanzado'),
 (8, 'Jornada de integracion deportiva'),
 (9, 'Participacion en liga interna'),
-(10, 'Competencia nacional universitaria');
+(10, 'Competencia nacional universitaria'),
+(11, 'Practica Profesional Supervisada'),
+(12, 'Trabajo Final Integrador'),
+(13, 'Practica Final Integradora');
 
 -- 7. Carrera (12 filas, FK a Facultad)
 INSERT INTO Carrera (ID_Carrera, Nombre, ID_Facultad) VALUES
