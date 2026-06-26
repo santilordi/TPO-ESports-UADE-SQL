@@ -337,8 +337,14 @@ BEGIN
         SELECT @cN = NombreFacultad, @cS = Sede FROM Facultad WHERE ID_Facultad = @id;
         IF (@nombre != 'default') SET @cN = @nombre;
         IF (@sede != 'default') SET @cS = @sede;
-        UPDATE Facultad SET NombreFacultad = @cN, Sede = @cS WHERE ID_Facultad = @id;
-        PRINT('Facultad actualizada.');
+        
+        IF EXISTS(SELECT 1 FROM Facultad WHERE NombreFacultad = @cN AND Sede = @cS AND ID_Facultad != @id)
+            PRINT('Error: Facultad ya registrada.');
+        ELSE
+        BEGIN
+            UPDATE Facultad SET NombreFacultad = @cN, Sede = @cS WHERE ID_Facultad = @id;
+            PRINT('Facultad actualizada.');
+        END
     END
 END;
 GO
@@ -408,8 +414,14 @@ BEGIN
         SELECT @cN = Nombre, @cG = Genero FROM Juego WHERE ID_Juego = @id;
         IF (@nom != 'default') SET @cN = @nom;
         IF (@gen != 'default') SET @cG = @gen;
-        UPDATE Juego SET Nombre = @cN, Genero = @cG WHERE ID_Juego = @id;
-        PRINT('Juego actualizado.');
+        
+        IF EXISTS(SELECT 1 FROM Juego WHERE Nombre = @cN AND ID_Juego != @id)
+            PRINT('Error: El juego ya existe.');
+        ELSE
+        BEGIN
+            UPDATE Juego SET Nombre = @cN, Genero = @cG WHERE ID_Juego = @id;
+            PRINT('Juego actualizado.');
+        END
     END
 END;
 GO
@@ -443,8 +455,14 @@ BEGIN
         SELECT @cN = NombreRol, @cD = Descripcion FROM RolParticipacion WHERE ID_Rol = @id;
         IF (@nom != 'default') SET @cN = @nom;
         IF (@desc != 'default') SET @cD = @desc;
-        UPDATE RolParticipacion SET NombreRol = @cN, Descripcion = @cD WHERE ID_Rol = @id;
-        PRINT('Rol actualizado.');
+        
+        IF EXISTS(SELECT 1 FROM RolParticipacion WHERE NombreRol = @cN AND ID_Rol != @id)
+            PRINT('Error: El rol ya existe.');
+        ELSE
+        BEGIN
+            UPDATE RolParticipacion SET NombreRol = @cN, Descripcion = @cD WHERE ID_Rol = @id;
+            PRINT('Rol actualizado.');
+        END
     END
 END;
 GO
@@ -477,8 +495,14 @@ BEGIN
         DECLARE @cE VARCHAR(100);
         SELECT @cE = EmailInst FROM Tutor WHERE LegajoDocenteTutor = @id;
         IF (@email != 'default') SET @cE = @email;
-        UPDATE Tutor SET EmailInst = @cE WHERE LegajoDocenteTutor = @id;
-        PRINT('Tutor actualizado.');
+        
+        IF EXISTS(SELECT 1 FROM Tutor WHERE EmailInst = @cE AND LegajoDocenteTutor != @id)
+            PRINT('Error: El Email ya existe.');
+        ELSE
+        BEGIN
+            UPDATE Tutor SET EmailInst = @cE WHERE LegajoDocenteTutor = @id;
+            PRINT('Tutor actualizado.');
+        END
     END
 END;
 GO
@@ -504,6 +528,8 @@ CREATE OR ALTER PROCEDURE sp_ActualizarTipoValidacion @id INT, @nom VARCHAR(100)
 AS
 BEGIN
     IF NOT EXISTS(SELECT 1 FROM TipoValidacionAcademica WHERE ID_TipoValidacion = @id) PRINT('Error: ID no existe.');
+    ELSE IF EXISTS(SELECT 1 FROM TipoValidacionAcademica WHERE NombreRequisito = @nom AND ID_TipoValidacion != @id)
+        PRINT('Error: Requisito ya existe.');
     ELSE
     BEGIN
         UPDATE TipoValidacionAcademica SET NombreRequisito = @nom WHERE ID_TipoValidacion = @id;
@@ -520,6 +546,7 @@ CREATE OR ALTER PROCEDURE sp_InsertarCarrera @nom VARCHAR(100), @idFac INT
 AS
 BEGIN
     IF NOT EXISTS(SELECT 1 FROM Facultad WHERE ID_Facultad = @idFac) PRINT('Error: La Facultad no existe.');
+    ELSE IF EXISTS(SELECT 1 FROM Carrera WHERE Nombre = @nom) PRINT('Error: La Carrera ya existe.');
     ELSE
     BEGIN
         DECLARE @id INT = (SELECT ISNULL(MAX(ID_Carrera), 0) + 1 FROM Carrera);
@@ -543,8 +570,14 @@ BEGIN
             IF EXISTS(SELECT 1 FROM Facultad WHERE ID_Facultad = @idF) SET @cF = @idF;
             ELSE PRINT('Error: La nueva Facultad no existe, no se cambió.');
         END
-        UPDATE Carrera SET Nombre = @cN, ID_Facultad = @cF WHERE ID_Carrera = @id;
-        PRINT('Carrera actualizada.');
+        
+        IF EXISTS(SELECT 1 FROM Carrera WHERE Nombre = @cN AND ID_Carrera != @id)
+            PRINT('Error: La Carrera ya existe.');
+        ELSE
+        BEGIN
+            UPDATE Carrera SET Nombre = @cN, ID_Facultad = @cF WHERE ID_Carrera = @id;
+            PRINT('Carrera actualizada.');
+        END
     END
 END;
 GO
@@ -616,6 +649,7 @@ CREATE OR ALTER PROCEDURE sp_InsertarEquipo @nom VARCHAR(100), @fec DATE, @idTor
 AS
 BEGIN
     IF NOT EXISTS(SELECT 1 FROM TorneoESports WHERE ID_Torneo = @idTor) PRINT('Error: El Torneo no existe.');
+    ELSE IF EXISTS(SELECT 1 FROM Equipo WHERE Nombre = @nom AND ID_Torneo = @idTor) PRINT('Error: El Equipo ya existe en ese torneo.');
     ELSE
     BEGIN
         DECLARE @id INT = (SELECT ISNULL(MAX(ID_Equipo), 0) + 1 FROM Equipo);
@@ -629,6 +663,8 @@ CREATE OR ALTER PROCEDURE sp_ActualizarEquipo @id INT, @nom VARCHAR(100)
 AS
 BEGIN
     IF NOT EXISTS(SELECT 1 FROM Equipo WHERE ID_Equipo = @id) PRINT('Error: Equipo no existe.');
+    ELSE IF EXISTS(SELECT 1 FROM Equipo WHERE Nombre = @nom AND ID_Torneo = (SELECT ID_Torneo FROM Equipo WHERE ID_Equipo = @id) AND ID_Equipo != @id)
+        PRINT('Error: El Equipo ya existe en ese torneo.');
     ELSE
     BEGIN
         UPDATE Equipo SET Nombre = @nom WHERE ID_Equipo = @id;
@@ -647,6 +683,12 @@ BEGIN
     IF NOT EXISTS(SELECT 1 FROM Estudiante WHERE Legajo = @leg) PRINT('Error: Estudiante no existe.');
     ELSE IF NOT EXISTS(SELECT 1 FROM Equipo WHERE ID_Equipo = @idEq) PRINT('Error: Equipo no existe.');
     ELSE IF NOT EXISTS(SELECT 1 FROM RolParticipacion WHERE ID_Rol = @idRol) PRINT('Error: Rol no existe.');
+    ELSE IF EXISTS(
+        SELECT 1 
+        FROM Integra i 
+        INNER JOIN Equipo e ON i.ID_Equipo = e.ID_Equipo
+        WHERE i.Legajo = @leg AND e.ID_Torneo = (SELECT ID_Torneo FROM Equipo WHERE ID_Equipo = @idEq)
+    ) PRINT('Error: El estudiante ya participa en un equipo para esta edición del torneo.');
     ELSE
     BEGIN
         INSERT INTO Integra VALUES (@leg, @idEq, @idRol);
@@ -681,6 +723,8 @@ BEGIN
         PRINT('Error: El tipo de validación no existe.');
     ELSE IF (@legTutor IS NOT NULL AND NOT EXISTS(SELECT 1 FROM Tutor WHERE LegajoDocenteTutor = @legTutor))
         PRINT('Error: El Tutor especificado no existe.');
+    ELSE IF EXISTS(SELECT 1 FROM ValidacionAcademica WHERE Legajo = @leg AND ID_Equipo = @idEq AND ID_Rol = @idRol AND ID_TipoValidacion = @idTip)
+        PRINT('Error: La validación ya se encuentra registrada.');
     ELSE
     BEGIN
         DECLARE @id INT = (SELECT ISNULL(MAX(ID_Validacion), 0) + 1 FROM ValidacionAcademica);
