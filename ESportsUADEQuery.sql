@@ -994,18 +994,25 @@ LEFT JOIN Tutor tut ON v.LegajoDocenteTutor = tut.LegajoDocenteTutor
 WHERE v.EstadoAprobacion = 'Pendiente';
 
 
---Q-04: Equipos con más integrantes por torneo
+--Q-04: Equipo con MÁS integrantes por torneo (solo el top de cada torneo)
 SELECT 
     t.Edicion AS TorneoEdicion,
     j.Nombre AS Juego,
     eq.Nombre AS Equipo,
     COUNT(DISTINCT i.Legajo) AS TotalIntegrantes
 FROM TorneoESports t
-INNER JOIN Juego j ON t.ID_Juego = j.ID_Juego
+INNER JOIN Juego j   ON t.ID_Juego  = j.ID_Juego
 INNER JOIN Equipo eq ON t.ID_Torneo = eq.ID_Torneo
 INNER JOIN Integra i ON eq.ID_Equipo = i.ID_Equipo
-GROUP BY t.Edicion, j.Nombre, eq.Nombre, t.ID_Torneo
-ORDER BY t.ID_Torneo ASC, TotalIntegrantes DESC;
+GROUP BY t.ID_Torneo, t.Edicion, j.Nombre, eq.Nombre
+HAVING COUNT(DISTINCT i.Legajo) >= ALL (
+    SELECT COUNT(DISTINCT i2.Legajo)
+    FROM Equipo eq2
+    INNER JOIN Integra i2 ON eq2.ID_Equipo = i2.ID_Equipo
+    WHERE eq2.ID_Torneo = t.ID_Torneo
+    GROUP BY eq2.ID_Equipo
+)
+ORDER BY t.ID_Torneo ASC;
 
 
 --Q-05: Distribución de roles en el sistema
