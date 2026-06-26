@@ -157,7 +157,13 @@ INSERT INTO Estudiante (Legajo, DNI, Nombre, Apellido, EmailInst, FechaNac) VALU
 (1009, '40901234', 'Bruno',     'Sanchez',   'bsanchez@uade.edu.ar',  '2000-08-14'),
 (1010, '41012345', 'Agustina',  'Romero',    'aromero@uade.edu.ar',   '2002-02-28'),
 (1011, '41123456', 'Matias',    'Torres',    'mtorres@uade.edu.ar',   '1999-06-07'),
-(1012, '41234567', 'Sofia',     'Alvarez',   'salvarez@uade.edu.ar',  '2001-10-19');
+(1012, '41234567', 'Sofia',     'Alvarez',   'salvarez@uade.edu.ar',  '2001-10-19'),
+(1013, '41345678', 'Tomas',     'Ramirez',   'tramirez@uade.edu.ar',  '2003-05-20'),
+(1014, '41456789', 'Camila',    'Mendoza',   'cmendoza@uade.edu.ar',  '2004-08-15'),
+(1015, '41567890', 'Nicolas',   'Castillo',  'ncastillo@uade.edu.ar', '1997-02-10'),
+(1016, '41678901', 'Lara',      'Silva',     'lsilva@uade.edu.ar',    '1998-11-03'),
+(1017, '41789012', 'Franco',    'Paz',       'fpaz@uade.edu.ar',      '2000-07-22'),
+(1018, '41890123', 'Julieta',   'Vega',      'jvega@uade.edu.ar',     '2001-09-14');
 
 -- 3. Juego (12 filas)
 INSERT INTO Juego (ID_Juego, Nombre, Genero) VALUES
@@ -243,7 +249,13 @@ INSERT INTO InscripcionCarrera (Legajo, ID_Carrera) VALUES
 (1009, 8),
 (1010, 9),
 (1011, 10),
-(1012, 11);
+(1012, 11),
+(1013, 1),
+(1014, 6),
+(1015, 3),
+(1016, 9),
+(1017, 4),
+(1018, 12);
 
 -- 9. TorneoESports (12 filas, FK a Juego)
 INSERT INTO TorneoESports (ID_Torneo, Edicion, Estado, FechaInicio, FechaFin, ID_Juego) VALUES
@@ -273,7 +285,12 @@ INSERT INTO Equipo (ID_Equipo, Nombre, FechaInscrip, ID_Torneo) VALUES
 (9,  'UADE Eagles',  '2026-02-25', 8),
 (10, 'UADE Sharks',  '2026-06-15', 9),
 (11, 'UADE Panthers','2026-06-20', 10),
-(12, 'UADE Bears',   '2026-02-10', 11);
+(12, 'UADE Bears',   '2026-02-10', 11),
+(13, 'UADE Storm',   '2026-02-15', 7),
+(14, 'UADE Thunder', '2026-02-20', 8),
+(15, 'UADE Aces',    '2026-06-10', 9),
+(16, 'UADE Vipers',  '2026-06-25', 10),
+(17, 'UADE Spartans','2026-02-10', 11);
 
 -- 11. Integra (12 filas, FKs a Estudiante, Equipo, RolParticipacion)
 INSERT INTO Integra (Legajo, ID_Equipo, ID_Rol) VALUES
@@ -288,7 +305,34 @@ INSERT INTO Integra (Legajo, ID_Equipo, ID_Rol) VALUES
 (1009, 3, 2),
 (1010, 4, 5),
 (1011, 5, 2),
-(1012, 5, 6);
+(1012, 5, 6),
+(1013, 6, 2),
+(1014, 6, 1),
+(1015, 7, 1),
+(1016, 7, 2),
+(1017, 8, 1),
+(1018, 8, 2),
+(1003, 9, 2),
+(1013, 9, 4),
+(1006, 10, 4),
+(1014, 10, 2),
+(1007, 11, 5),
+(1015, 11, 7),
+(1009, 12, 2),
+(1016, 12, 8),
+(1001, 13, 2),
+(1004, 13, 3),
+(1004, 14, 2),
+(1018, 14, 7),
+(1005, 15, 1),
+(1008, 15, 2),
+(1010, 15, 6),
+(1002, 16, 3),
+(1011, 16, 2),
+(1012, 16, 6),
+(1013, 17, 1),
+(1014, 17, 2),
+(1015, 17, 4);
 
 -- 12. ValidacionAcademica (11 filas, FKs a Integra, TipoValidacionAcademica y Tutor)
 INSERT INTO ValidacionAcademica (ID_Validacion, EstadoAprobacion, ComentariosTutor, FechaRes, Legajo, ID_Equipo, ID_Rol, ID_TipoValidacion, LegajoDocenteTutor) VALUES
@@ -302,7 +346,18 @@ INSERT INTO ValidacionAcademica (ID_Validacion, EstadoAprobacion, ComentariosTut
 (8,  'Aprobado',  'Gran compromiso y dedicacion con el equipo',    '2026-04-15', 1003, 1, 2, 6, 2001),
 (9,  'Pendiente', NULL,                                             NULL,        1006, 2, 2, 7, NULL),
 (10, 'Aprobado',  'Cumplio con todos los requisitos academicos',   '2026-05-10', 1012, 5, 6, 8, 2007),
-(11, 'Rechazado', 'No alcanzo el minimo de participaciones',       '2026-05-20', 1010, 4, 5, 9, 2008);
+(11, 'Rechazado', 'No alcanzo el minimo de participaciones',       '2026-05-20', 1010, 4, 5, 9, 2008),
+(12, 'Aprobado',  'Rendimiento destacado en el equipo',            '2025-12-10', 1009, 3, 2, 2, 2009),
+(13, 'Aprobado',  'Excelente integracion al equipo',               '2026-04-15', 1013, 6, 2, 3, 2004),
+(14, 'Pendiente', NULL,                                             NULL,        1014, 6, 1, 1, NULL),
+(15, 'Pendiente', NULL,                                             NULL,        1015, 7, 1, 6, NULL),
+(16, 'Aprobado',  'Gran compromiso como jugador',                  '2026-05-20', 1016, 7, 2, 2, 2002),
+(17, 'Pendiente', NULL,                                             NULL,        1017, 8, 1, 8, NULL),
+(18, 'Aprobado',  'Cumplio con todas las jornadas',                '2026-06-10', 1018, 8, 2, 7, 2010),
+(19, 'Aprobado',  'Lidero el segundo equipo exitosamente',         '2026-06-01', 1005, 15, 1, 1, 2005),
+(20, 'Pendiente', NULL,                                             NULL,        1008, 15, 2, 5, NULL),
+(21, 'Aprobado',  'Excelente labor como coach',                    '2026-06-15', 1007, 11, 5, 2, 2003),
+(22, 'Rechazado', 'No cumplio con los requisitos minimos',         '2026-06-20', 1002, 16, 3, 8, 2008);
 GO
 
 
@@ -941,7 +996,7 @@ SELECT
     t.Edicion AS TorneoEdicion,
     j.Nombre AS Juego,
     eq.Nombre AS Equipo,
-    COUNT(i.Legajo) AS TotalIntegrantes
+    COUNT(DISTINCT i.Legajo) AS TotalIntegrantes
 FROM TorneoESports t
 INNER JOIN Juego j ON t.ID_Juego = j.ID_Juego
 INNER JOIN Equipo eq ON t.ID_Torneo = eq.ID_Torneo
