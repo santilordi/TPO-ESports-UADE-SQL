@@ -771,7 +771,8 @@ BEGIN
         EstadoNuevo        VARCHAR(50) NOT NULL,
         LegajoDocenteTutor INT NULL,
         FechaCambio        DATETIME NOT NULL DEFAULT GETDATE(),
-        UsuarioBD          VARCHAR(128) NOT NULL DEFAULT SUSER_SNAME()
+        UsuarioBD          VARCHAR(128) NOT NULL DEFAULT SUSER_SNAME(),
+        CONSTRAINT FK_AuditoriaValidacion_ValidacionAcademica FOREIGN KEY (ID_Validacion) REFERENCES ValidacionAcademica(ID_Validacion)
     );
 END;
 GO
